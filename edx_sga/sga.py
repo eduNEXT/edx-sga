@@ -11,6 +11,7 @@ import urllib
 import pkg_resources
 import pytz
 from courseware.models import StudentModule  # lint-amnesty, pylint: disable=import-error
+from ccx_keys.locator import CCXLocator
 from django.conf import settings  # lint-amnesty, pylint: disable=import-error
 from django.core.exceptions import PermissionDenied  # lint-amnesty, pylint: disable=import-error
 from django.core.files import File  # lint-amnesty, pylint: disable=import-error
@@ -912,6 +913,11 @@ class StaffGradedAssignmentXBlock(StudioEditableXBlockMixin, ShowAnswerXBlockMix
         """
         Check if user role is instructor.
         """
+        # If it's a CCX course and the user has staff role (CCX coach)
+        # the user must be able to grade assignments without instructor approval.
+        if isinstance(self.course_id, CCXLocator):
+            return self.xmodule_runtime.get_user_role() == 'staff'
+
         return self.xmodule_runtime.get_user_role() == 'instructor'
 
     def show_staff_grading_interface(self):
